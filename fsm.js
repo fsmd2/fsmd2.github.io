@@ -74,12 +74,22 @@ Link.prototype.getEndPointsAndCircle = function() {
 			'endY': end.y,
 		};
 	}
+	
+	var adjustedRadiusA = nodeRadius;
+	if (this.nodeA.text.startsWith("@")) {
+		adjustedRadiusA += 10 * (this.nodeA.text.match(/@/g) || []).length;
+	}
+	var adjustedRadiusB = nodeRadius;
+	if (this.nodeB.text.startsWith("@")) {
+		adjustedRadiusB += 10 * (this.nodeB.text.match(/@/g) || []).length;
+	}
+	
 	var anchor = this.getAnchorPoint();
 	var circle = circleFromThreePoints(this.nodeA.x, this.nodeA.y, this.nodeB.x, this.nodeB.y, anchor.x, anchor.y);
 	var isReversed = (this.perpendicularPart > 0);
 	var reverseScale = isReversed ? 1 : -1;
-	var startAngle = Math.atan2(this.nodeA.y - circle.y, this.nodeA.x - circle.x) - reverseScale * nodeRadius / circle.radius;
-	var endAngle = Math.atan2(this.nodeB.y - circle.y, this.nodeB.x - circle.x) + reverseScale * nodeRadius / circle.radius;
+	var startAngle = Math.atan2(this.nodeA.y - circle.y, this.nodeA.x - circle.x) - reverseScale * adjustedRadiusA / circle.radius;
+	var endAngle = Math.atan2(this.nodeB.y - circle.y, this.nodeB.x - circle.x) + reverseScale * adjustedRadiusB / circle.radius;
 	var startX = circle.x + circle.radius * Math.cos(startAngle);
 	var startY = circle.y + circle.radius * Math.sin(startAngle);
 	var endX = circle.x + circle.radius * Math.cos(endAngle);
@@ -192,9 +202,14 @@ Node.prototype.setAnchorPoint = function(x, y) {
 };
 
 Node.prototype.draw = function(c) {
+	var adjustedRadius = nodeRadius;
+	if (this.text.startsWith("@")) {
+		adjustedRadius += 10 * (this.text.match(/@/g) || []).length;
+	}
+	
 	// draw the circle
 	c.beginPath();
-	c.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
+	c.arc(this.x, this.y, adjustedRadius, 0, 2 * Math.PI, false);
 	c.stroke();
 
 	// draw the text
@@ -203,7 +218,7 @@ Node.prototype.draw = function(c) {
 	// draw a double circle for an accept state
 	if(this.isAcceptState) {
 		c.beginPath();
-		c.arc(this.x, this.y, nodeRadius - 6, 0, 2 * Math.PI, false);
+		c.arc(this.x, this.y, adjustedRadius - 6, 0, 2 * Math.PI, false);
 		c.stroke();
 	}
 };
@@ -462,7 +477,7 @@ function ExportAsLaTeX() {
 			}
 			x *= this._scale;
 			y *= this._scale;
-			this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
+			this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }').replace(/@/g, '') + '$};\n';
 		}
 	};
 
