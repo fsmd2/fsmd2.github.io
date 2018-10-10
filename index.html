@@ -19,10 +19,15 @@ h1 {
 canvas {
 	display: block;
 	max-width: 800px;
-	background: white;
+	background: transparent;
 	border-radius: 20px;
 	-moz-border-radius: 20px;
 	margin: 10px auto;
+}
+
+.bg {
+	background: url(grid.png);
+	border-radius: 20px;
 }
 
 a {
@@ -99,9 +104,11 @@ if (typeof btoa == 'undefined') {
 	</script>
 </head><body>
 	<h1>Finite State Machine Designer</h1>
+	<div class="bg">
 	<canvas id="canvas" width="800" height="600">
 		<span class="error">Your browser does not support<br>the HTML5 &lt;canvas&gt; element</span>
 	</canvas>
+	</div>
 	<div>
 		<p class="center">
 			<a href="javascript:importSave()">Import JSON</a>
@@ -123,7 +130,7 @@ if (typeof btoa == 'undefined') {
 			<li><b>Make accept state:</b> double-click on an existing state</li>
 			<li><b>Type numeric subscript:</b> put an underscore before the number (like "S_0")</li>
 			<li><b>Type greek letter:</b> put a backslash before it (like "\beta")</li>
-			<li><b>Make circle bigger:</b> put @ signs at the beginning of the text. They will be removed when exporting to LaTeX</li>
+			<li><b>Make circle bigger:</b> put @ signs at the beginning of the text. They will be removed when exporting</li>
 		</ul>
 		<p>This was made in HTML5 and JavaScript using the canvas element.</p>
 	</div>

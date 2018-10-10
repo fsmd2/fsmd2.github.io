@@ -227,9 +227,13 @@ Node.prototype.closestPointOnCircle = function(x, y) {
 	var dx = x - this.x;
 	var dy = y - this.y;
 	var scale = Math.sqrt(dx * dx + dy * dy);
+	var adjustedRadius = nodeRadius;
+	if (this.text.startsWith("@")) {
+		adjustedRadius += 10 * (this.text.match(/@/g) || []).length;
+	}
 	return {
-		'x': this.x + dx * nodeRadius / scale,
-		'y': this.y + dy * nodeRadius / scale,
+		'x': this.x + dx * adjustedRadius / scale,
+		'y': this.y + dy * adjustedRadius / scale,
 	};
 };
 
@@ -263,9 +267,14 @@ SelfLink.prototype.setAnchorPoint = function(x, y) {
 };
 
 SelfLink.prototype.getEndPointsAndCircle = function() {
-	var circleX = this.node.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
-	var circleY = this.node.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
-	var circleRadius = 0.75 * nodeRadius;
+	var adjustedRadius = nodeRadius;
+	if (this.node.text.startsWith("@")) {
+		adjustedRadius += 10 * (this.node.text.match(/@/g) || []).length;
+	}
+	
+	var circleX = this.node.x + 1.5 * adjustedRadius * Math.cos(this.anchorAngle);
+	var circleY = this.node.y + 1.5 * adjustedRadius * Math.sin(this.anchorAngle);
+	var circleRadius = 0.75 * adjustedRadius;
 	var startAngle = this.anchorAngle - Math.PI * 0.8;
 	var endAngle = this.anchorAngle + Math.PI * 0.8;
 	var startX = circleX + circleRadius * Math.cos(startAngle);
@@ -567,6 +576,7 @@ function ExportAsSVG() {
 		x += this._transX;
 		y += this._transY;
 		if(text.replace(' ', '').length > 0) {
+			text = text.replace(/@/g, '');
 			this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
 		}
 	};
@@ -625,6 +635,7 @@ function canvasHasFocus() {
 }
 
 function drawText(c, originalText, x, y, angleOrNull, isSelected) {
+	if (dontDrawAtSigns) originalText = originalText.replace(/@/g, '');
 	text = convertLatexShortcuts(originalText);
 	c.font = '20px "Times New Roman", serif';
 	var width = c.measureText(text).width;
@@ -683,6 +694,7 @@ var movingObject = false;
 var originalClick;
 
 function drawUsing(c) {
+	c.fillStyle = "rgba(0, 0, 0, 0)";
 	c.clearRect(0, 0, canvas.width, canvas.height);
 	c.save();
 	c.translate(0.5, 0.5);
@@ -947,10 +959,13 @@ function output(text) {
 	element.value = text;
 }
 
+var dontDrawAtSigns = false;
 function saveAsPNG() {
 	var oldSelectedObject = selectedObject;
 	selectedObject = null;
+	dontDrawAtSigns = true;
 	drawUsing(canvas.getContext('2d'));
+	dontDrawAtSigns = false;
 	selectedObject = oldSelectedObject;
 	var pngData = canvas.toDataURL('image/png');
 	document.location.href = pngData;
