@@ -994,6 +994,18 @@ function saveAsLaTeX() {
 	output(texData);
 }
 
+function saveAsLaTeXCompressedWithJson() {
+	var exporter = new ExportAsLaTeX();
+	var oldSelectedObject = selectedObject;
+	selectedObject = null;
+	drawUsing(exporter);
+	selectedObject = oldSelectedObject;
+	var texDataLines = exporter.toLaTeX().split("\n");
+	var texBegin = texDataLines[0];
+	texDataLines.shift();
+	output(texBegin + "\n%" + localStorage['fsm'] + "\n" + texDataLines.join(" "));
+}
+
 function saveAsJSON() {
 	output(localStorage['fsm']);
 }
